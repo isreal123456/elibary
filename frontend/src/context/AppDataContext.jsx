@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react"
 import { useAuth } from "./AuthContext"
 import {
+  assessments as initialAssessments,
+  assessmentSubmissions as initialAssessmentSubmissions,
   courses as initialCourses,
   resources as initialResources,
 } from "../data/mockData"
@@ -24,6 +26,10 @@ function slugify(value) {
 export function AppDataProvider({ children }) {
   const { token, user } = useAuth()
   const [courses, setCourses] = useState(initialCourses)
+  const [assessments, setAssessments] = useState(initialAssessments)
+  const [assessmentSubmissions, setAssessmentSubmissions] = useState(
+    initialAssessmentSubmissions,
+  )
   const [resources] = useState(initialResources)
   const [users, setUsers] = useState([])
   const [isUsersLoading, setIsUsersLoading] = useState(false)
@@ -161,6 +167,8 @@ export function AppDataProvider({ children }) {
   const value = useMemo(
     () => ({
       courses,
+      assessments,
+      assessmentSubmissions,
       resources,
       users,
       isUsersLoading,
@@ -169,6 +177,8 @@ export function AppDataProvider({ children }) {
       updateUserRole,
       createCourse,
       addModuleToCourse,
+      createAssessment,
+      submitAssessment,
     }),
     [courses, resources, users, isUsersLoading, usersError, token, user?.role],
   )

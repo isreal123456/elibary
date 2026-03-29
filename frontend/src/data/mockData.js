@@ -202,3 +202,85 @@ export const users = [
     role: "student",
   },
 ]
+
+export const assessments = [
+  {
+    id: "asm-react-1",
+    title: "React Basics Quiz",
+    description: "Check understanding of JSX and component patterns.",
+    courseId: "react-fundamentals",
+    moduleId: "rf-week-1",
+    fileUrl:
+      "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    fileName: "react-basics-quiz.pdf",
+    questions: [
+      {
+        id: "q1",
+        type: "mcq",
+        question: "Which hook is used for local state?",
+        options: ["useMemo", "useState", "useEffect", "useContext"],
+        correctAnswer: "useState",
+      },
+      {
+        id: "q2",
+        type: "text",
+        question: "JSX stands for?",
+        correctAnswer: "JavaScript XML",
+      },
+    ],
+    createdBy: "Aisha Bello",
+  },
+  {
+    id: "asm-js-1",
+    title: "JavaScript Arrays Assessment",
+    description: "Short assessment on array methods and transformations.",
+    courseId: "javascript-core",
+    moduleId: "js-week-2",
+    fileUrl:
+      "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+    fileName: "arrays-assessment.pdf",
+    questions: [
+      {
+        id: "q1",
+        type: "mcq",
+        question: "Which method creates a new array after transforming items?",
+        options: ["forEach", "map", "find", "sort"],
+        correctAnswer: "map",
+      },
+    ],
+    createdBy: "Ibrahim Yusuf",
+  },
+]
+
+export const assessmentSubmissions = [
+  {
+    id: "sub-1",
+    assessmentId: "asm-react-1",
+    studentName: "Sarah Okeke",
+    answers: {
+      q1: "useState",
+      q2: "JavaScript XML",
+    },
+    uploadedFileName: "sarah-react-answers.docx",
+    score: 2,
+    total: 2,
+    percentage: 100,
+    status: "Completed",
+    submittedAt: "2026-03-20T10:30:00.000Z",
+  },
+  {
+    id: "sub-2",
+    assessmentId: "asm-react-1",
+    studentName: "David Mensah",
+    answers: {
+      q1: "useEffect",
+      q2: "JavaScript XML",
+    },
+    uploadedFileName: "david-react-answers.pdf",
+    score: 1,
+    total: 2,
+    percentage: 50,
+    status: "Completed",
+    submittedAt: "2026-03-21T16:20:00.000Z",
+  },
+]

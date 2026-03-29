@@ -2,7 +2,7 @@ import Button from "../components/Button"
 import { useAppData } from "../context/AppDataContext"
 
 function AdminCoursesPage() {
-  const { courses } = useAppData()
+  const { courses, assessments } = useAppData()
 
   return (
     <div className="space-y-5">
@@ -23,6 +23,7 @@ function AdminCoursesPage() {
                 <th className="py-2 pr-4 font-medium">Course</th>
                 <th className="py-2 pr-4 font-medium">Instructor</th>
                 <th className="py-2 font-medium">Modules</th>
+                <th className="py-2 font-medium">Assessments</th>
               </tr>
             </thead>
             <tbody>
@@ -31,6 +32,12 @@ function AdminCoursesPage() {
                   <td className="py-2 pr-4 text-slate-900">{course.title}</td>
                   <td className="py-2 pr-4 text-slate-600">{course.instructor}</td>
                   <td className="py-2 text-slate-600">{course.modules.length}</td>
+                  <td className="py-2 text-slate-600">
+                    {
+                      assessments.filter((assessment) => assessment.courseId === course.id)
+                        .length
+                    }
+                  </td>
                 </tr>
               ))}
             </tbody>

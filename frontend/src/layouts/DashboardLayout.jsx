@@ -6,10 +6,10 @@ function DashboardLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   return (
-    <div className="mx-auto flex w-full max-w-6xl gap-6 px-4 sm:px-6">
+    <div className="flex w-full px-4 sm:px-6">
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <section className="w-full">
+      <section className="w-full lg:ml-72 lg:pl-6">
         <button
           type="button"
           onClick={() => setIsSidebarOpen(true)}
@@ -17,7 +17,9 @@ function DashboardLayout() {
         >
           Open Menu
         </button>
-        <Outlet />
+        <div className="mx-auto w-full max-w-5xl">
+          <Outlet />
+        </div>
       </section>
     </div>
   )

@@ -1,5 +1,6 @@
 import Button from "../components/Button"
 import CourseCard from "../components/CourseCard"
+import ResultsTable from "../components/ResultsTable"
 import { useAppData } from "../context/AppDataContext"
 import { useAuth } from "../context/AuthContext"
 
@@ -14,7 +15,7 @@ function DashboardPage() {
           Admin Dashboard
         </h1>
 
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
             <p className="text-sm text-slate-500">Total Users</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
@@ -25,6 +26,12 @@ function DashboardPage() {
             <p className="text-sm text-slate-500">Total Courses</p>
             <p className="mt-2 text-3xl font-semibold text-slate-900">
               {courses.length}
+            </p>
+          </div>
+          <div className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
+            <p className="text-sm text-slate-500">Total Assessments</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {assessments.length}
             </p>
           </div>
         </div>
@@ -61,6 +68,8 @@ function DashboardPage() {
             )}
           </div>
         </div>
+
+        <ResultsTable rows={sharedRows} />
       </div>
     )
   }
@@ -73,9 +82,14 @@ function DashboardPage() {
           <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
             Instructor Dashboard
           </h1>
-          <Button to="/instructor/create-course" className="w-full sm:w-auto">
-            Create Course
-          </Button>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button to="/instructor/create-course" className="w-full sm:w-auto">
+              Create Course
+            </Button>
+            <Button to="/instructor/my-courses" variant="secondary" className="w-full sm:w-auto">
+              Add Assessment
+            </Button>
+          </div>
         </div>
 
         <div className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
@@ -92,6 +106,8 @@ function DashboardPage() {
             )}
           </div>
         </div>
+
+        <ResultsTable rows={sharedRows} />
       </div>
     )
   }
@@ -122,6 +138,7 @@ function DashboardPage() {
           <CourseCard key={course.id} course={course} />
         ))}
       </div>
+      <ResultsTable rows={sharedRows} />
     </div>
   )
 }
