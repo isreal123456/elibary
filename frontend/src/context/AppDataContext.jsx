@@ -1,13 +1,19 @@
-import { createContext, useContext, useMemo, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { useAuth } from "./AuthContext"
 import {
   assessments as initialAssessments,
   assessmentSubmissions as initialAssessmentSubmissions,
   courses as initialCourses,
   resources as initialResources,
-  users as initialUsers,
 } from "../data/mockData"
+import { apiRequest } from "../lib/api"
 
 const AppDataContext = createContext(null)
+
+async function requestUsers(token) {
+  const data = await apiRequest("/api/users", { token })
+  return data.users || []
+}
 
 function slugify(value) {
   return value
@@ -18,13 +24,16 @@ function slugify(value) {
 }
 
 export function AppDataProvider({ children }) {
+  const { token, user } = useAuth()
   const [courses, setCourses] = useState(initialCourses)
   const [assessments, setAssessments] = useState(initialAssessments)
   const [assessmentSubmissions, setAssessmentSubmissions] = useState(
     initialAssessmentSubmissions,
   )
   const [resources] = useState(initialResources)
-  const [users] = useState(initialUsers)
+  const [users, setUsers] = useState([])
+  const [isUsersLoading, setIsUsersLoading] = useState(false)
+  const [usersError, setUsersError] = useState("")
 
   const createCourse = ({ title, description, thumbnail, instructor }) => {
     const idBase = slugify(title) || `course-${courses.length + 1}`
@@ -74,98 +83,85 @@ export function AppDataProvider({ children }) {
     )
   }
 
-  const createAssessment = ({
-    title,
-    description,
-    courseId,
-    moduleId,
-    fileUrl,
-    fileName,
-    questions,
-    createdBy,
-  }) => {
-    const id = `asm-${Date.now()}`
-
-    setAssessments((prev) => [
-      {
-        id,
-        title,
-        description,
-        courseId,
-        moduleId: moduleId || null,
-        fileUrl:
-          fileUrl ||
-          "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
-        fileName: fileName || "assessment-file.pdf",
-        questions: questions || [],
-        createdBy: createdBy || "Instructor",
-      },
-      ...prev,
-    ])
-  }
-
-  const submitAssessment = ({
-    assessmentId,
-    studentName,
-    answers,
-    uploadedFileName,
-  }) => {
-    const assessment = assessments.find((item) => item.id === assessmentId)
-    if (!assessment) {
+  const refreshUsers = async () => {
+    if (!token || user?.role !== "admin") {
+      setUsers([])
+      setUsersError("")
+      setIsUsersLoading(false)
       return
     }
 
-    const questions = assessment.questions || []
-    const total = questions.length || 1
+    setIsUsersLoading(true)
+    setUsersError("")
 
-    let score = 0
-    if (!questions.length) {
-      score = 1
-    } else {
-      questions.forEach((question) => {
-        const userAnswer = String(answers?.[question.id] || "")
-          .trim()
-          .toLowerCase()
-        const expected = String(question.correctAnswer || "")
-          .trim()
-          .toLowerCase()
-        if (userAnswer && userAnswer === expected) {
-          score += 1
+    try {
+      const nextUsers = await requestUsers(token)
+      setUsers(nextUsers)
+    } catch (error) {
+      setUsers([])
+      setUsersError(error.message)
+    } finally {
+      setIsUsersLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const syncUsers = async () => {
+      if (!token || user?.role !== "admin") {
+        setUsers([])
+        setUsersError("")
+        setIsUsersLoading(false)
+        return
+      }
+
+      setIsUsersLoading(true)
+      setUsersError("")
+
+      try {
+        const nextUsers = await requestUsers(token)
+
+        if (!isCancelled) {
+          setUsers(nextUsers)
         }
-      })
+      } catch (error) {
+        if (!isCancelled) {
+          setUsers([])
+          setUsersError(error.message)
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsUsersLoading(false)
+        }
+      }
     }
 
-    const percentage = Math.round((score / total) * 100)
+    syncUsers()
 
-    setAssessmentSubmissions((prev) => {
-      const existingIndex = prev.findIndex(
-        (row) => row.assessmentId === assessmentId && row.studentName === studentName,
-      )
+    return () => {
+      isCancelled = true
+    }
+  }, [token, user?.role])
 
-      const nextItem = {
-        id:
-          existingIndex >= 0
-            ? prev[existingIndex].id
-            : `sub-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-        assessmentId,
-        studentName,
-        answers,
-        uploadedFileName: uploadedFileName || "",
-        score,
-        total,
-        percentage,
-        status: "Completed",
-        submittedAt: new Date().toISOString(),
-      }
+  const updateUserRole = async ({ userId, role }) => {
+    if (!token) {
+      throw new Error("You must be logged in to update user roles.")
+    }
 
-      if (existingIndex >= 0) {
-        const copy = [...prev]
-        copy[existingIndex] = nextItem
-        return copy
-      }
-
-      return [nextItem, ...prev]
+    const data = await apiRequest(`/api/users/${userId}/role`, {
+      method: "PATCH",
+      token,
+      body: { role },
     })
+
+    setUsers((currentUsers) =>
+      currentUsers.map((currentUser) =>
+        currentUser.id === userId ? data.user : currentUser,
+      ),
+    )
+
+    return data.user
   }
 
   const value = useMemo(
@@ -175,12 +171,16 @@ export function AppDataProvider({ children }) {
       assessmentSubmissions,
       resources,
       users,
+      isUsersLoading,
+      usersError,
+      refreshUsers,
+      updateUserRole,
       createCourse,
       addModuleToCourse,
       createAssessment,
       submitAssessment,
     }),
-    [courses, assessments, assessmentSubmissions, resources, users],
+    [courses, resources, users, isUsersLoading, usersError, token, user?.role],
   )
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>

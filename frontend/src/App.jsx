@@ -16,9 +16,10 @@ import InstructorMyCoursesPage from './pages/InstructorMyCoursesPage'
 import LibraryPage from './pages/LibraryPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
+import RegisterPage from './pages/RegisterPage'
 
 function App() {
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, isLoading } = useAuth()
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-50 text-slate-800">
@@ -28,7 +29,35 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route
             path="/login"
-            element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+            element={
+              isLoading ? (
+                <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+                  <div className="rounded-lg bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
+                    <p className="text-sm text-slate-600">Checking your session...</p>
+                  </div>
+                </div>
+              ) : isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <LoginPage />
+              )
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              isLoading ? (
+                <div className="mx-auto w-full max-w-6xl px-4 sm:px-6">
+                  <div className="rounded-lg bg-white p-10 text-center shadow-sm ring-1 ring-slate-200">
+                    <p className="text-sm text-slate-600">Checking your session...</p>
+                  </div>
+                </div>
+              ) : isAuthenticated ? (
+                <Navigate to="/dashboard" replace />
+              ) : (
+                <RegisterPage />
+              )
+            }
           />
           <Route path="/home" element={<Navigate to="/" replace />} />
 

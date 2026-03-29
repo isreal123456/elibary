@@ -6,13 +6,7 @@ import { useAuth } from "../context/AuthContext"
 
 function DashboardPage() {
   const { user } = useAuth()
-  const { courses, users, assessments, assessmentSubmissions } = useAppData()
-  const sharedRows = assessmentSubmissions.map((row) => ({
-    ...row,
-    assessmentTitle:
-      assessments.find((assessment) => assessment.id === row.assessmentId)?.title ||
-      "Assessment",
-  }))
+  const { courses, users, isUsersLoading, usersError } = useAppData()
 
   if (user?.role === "admin") {
     return (
@@ -24,7 +18,9 @@ function DashboardPage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
             <p className="text-sm text-slate-500">Total Users</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-900">{users.length}</p>
+            <p className="mt-2 text-3xl font-semibold text-slate-900">
+              {isUsersLoading ? "..." : users.length}
+            </p>
           </div>
           <div className="rounded-lg bg-white p-5 shadow-sm ring-1 ring-slate-200">
             <p className="text-sm text-slate-500">Total Courses</p>
@@ -46,24 +42,30 @@ function DashboardPage() {
             <Button to="/admin/courses">Manage Courses</Button>
           </div>
           <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead className="border-b border-slate-200 text-slate-500">
-                <tr>
-                  <th className="py-2 pr-4 font-medium">Name</th>
-                  <th className="py-2 pr-4 font-medium">Email</th>
-                  <th className="py-2 font-medium">Role</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((row) => (
-                  <tr key={row.id} className="border-b border-slate-100">
-                    <td className="py-2 pr-4 text-slate-900">{row.name}</td>
-                    <td className="py-2 pr-4 text-slate-600">{row.email}</td>
-                    <td className="py-2 capitalize text-slate-600">{row.role}</td>
+            {usersError ? (
+              <p className="text-sm text-red-600">{usersError}</p>
+            ) : isUsersLoading ? (
+              <p className="text-sm text-slate-600">Loading users...</p>
+            ) : (
+              <table className="min-w-full text-left text-sm">
+                <thead className="border-b border-slate-200 text-slate-500">
+                  <tr>
+                    <th className="py-2 pr-4 font-medium">Name</th>
+                    <th className="py-2 pr-4 font-medium">Email</th>
+                    <th className="py-2 font-medium">Role</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {users.map((row) => (
+                    <tr key={row.id} className="border-b border-slate-100">
+                      <td className="py-2 pr-4 text-slate-900">{row.name}</td>
+                      <td className="py-2 pr-4 text-slate-600">{row.email}</td>
+                      <td className="py-2 capitalize text-slate-600">{row.role}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 

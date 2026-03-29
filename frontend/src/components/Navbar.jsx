@@ -61,9 +61,14 @@ function Navbar() {
               </Button>
             </>
           ) : (
-            <Button to="/login" variant="primary" className="ml-1">
-              Login
-            </Button>
+            <>
+              <Button to="/register" variant="secondary" className="ml-1">
+                Sign Up
+              </Button>
+              <Button to="/login" variant="primary" className="ml-1">
+                Login
+              </Button>
+            </>
           )}
         </nav>
       </div>
