@@ -12,6 +12,7 @@ function InstructorCreateCoursePage() {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [thumbnail, setThumbnail] = useState("")
+  const [category, setCategory] = useState("General")
   const [error, setError] = useState("")
 
   const handleSubmit = (event) => {
@@ -27,6 +28,7 @@ function InstructorCreateCoursePage() {
       description: description.trim(),
       thumbnail: thumbnail.trim(),
       instructor: user?.name || "Instructor",
+      category,
     })
     navigate("/instructor/my-courses")
   }
@@ -68,11 +70,29 @@ function InstructorCreateCoursePage() {
 
         <FormInput
           id="thumbnail-url"
-          label="Thumbnail URL (Mock)"
+          label="Thumbnail URL"
           value={thumbnail}
           onChange={(event) => setThumbnail(event.target.value)}
           placeholder="https://placehold.co/800x500"
         />
+
+        <div>
+          <label htmlFor="course-category" className="mb-1.5 block text-sm text-slate-700">
+            Category
+          </label>
+          <select
+            id="course-category"
+            value={category}
+            onChange={(event) => setCategory(event.target.value)}
+            className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+          >
+            <option value="General">General</option>
+            <option value="Frontend">Frontend</option>
+            <option value="Programming">Programming</option>
+            <option value="Design">Design</option>
+            <option value="Backend">Backend</option>
+          </select>
+        </div>
 
         {error ? <p className="text-xs text-red-600">{error}</p> : null}
 

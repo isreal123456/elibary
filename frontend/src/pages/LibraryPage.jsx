@@ -16,7 +16,7 @@ function LibraryPage() {
 
   const fileTypes = useMemo(
     () => ["All", ...new Set(resources.map((resource) => resource.type))],
-    [],
+    [resources],
   )
 
   const filteredResources = resources.filter((resource) => {

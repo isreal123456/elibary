@@ -26,16 +26,20 @@ function ModuleBlock({ module }) {
         />
       </div>
 
-      <div className="mt-5">
-        <Button
-          href={module.pdfUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="w-full sm:w-auto"
-        >
-          Download PDF
-        </Button>
-      </div>
+      {module.pdfUrl ? (
+        <div className="mt-5">
+          <Button
+            href={module.pdfUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full sm:w-auto"
+          >
+            Download PDF
+          </Button>
+        </div>
+      ) : (
+        <p className="mt-5 text-sm text-slate-500">No PDF attached to this module yet.</p>
+      )}
     </section>
   )
 }
