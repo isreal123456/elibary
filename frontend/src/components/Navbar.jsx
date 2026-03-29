@@ -2,6 +2,17 @@ import { NavLink } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import Button from "./Button"
 
+function BookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4 w-4">
+      <path
+        d="M5 4.5A2.5 2.5 0 0 1 7.5 2H20v17H7.5A2.5 2.5 0 0 0 5 21.5V4.5Zm0 17A2.5 2.5 0 0 1 7.5 19H18V4H7.5A.5.5 0 0 0 7 4.5V17h1.5a.75.75 0 0 1 0 1.5H7.5a1 1 0 0 0-1 1v2Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
 function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
 
@@ -17,8 +28,8 @@ function Navbar() {
     <header className="border-b border-slate-200 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <NavLink to="/" className="inline-flex items-center gap-2">
-          <span className="rounded-lg bg-slate-900 px-2 py-1 text-sm font-semibold text-white">
-            EL
+          <span className="rounded-lg bg-slate-900 p-2 text-white">
+            <BookIcon />
           </span>
           <span className="text-lg font-semibold text-slate-900">E-Library</span>
         </NavLink>

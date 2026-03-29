@@ -17,7 +17,7 @@ function CoursesPage() {
 
   const categories = useMemo(
     () => ["All", ...new Set(courses.map((course) => course.category))],
-    [],
+    [courses],
   )
 
   const filteredCourses = courses.filter((course) => {
