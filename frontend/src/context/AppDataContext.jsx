@@ -1,11 +1,17 @@
-import { createContext, useContext, useMemo, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useState } from "react"
+import { useAuth } from "./AuthContext"
 import {
   courses as initialCourses,
   resources as initialResources,
-  users as initialUsers,
 } from "../data/mockData"
+import { apiRequest } from "../lib/api"
 
 const AppDataContext = createContext(null)
+
+async function requestUsers(token) {
+  const data = await apiRequest("/api/users", { token })
+  return data.users || []
+}
 
 function slugify(value) {
   return value
@@ -16,9 +22,12 @@ function slugify(value) {
 }
 
 export function AppDataProvider({ children }) {
+  const { token, user } = useAuth()
   const [courses, setCourses] = useState(initialCourses)
   const [resources] = useState(initialResources)
-  const [users] = useState(initialUsers)
+  const [users, setUsers] = useState([])
+  const [isUsersLoading, setIsUsersLoading] = useState(false)
+  const [usersError, setUsersError] = useState("")
 
   const createCourse = ({ title, description, thumbnail, instructor }) => {
     const idBase = slugify(title) || `course-${courses.length + 1}`
@@ -68,15 +77,100 @@ export function AppDataProvider({ children }) {
     )
   }
 
+  const refreshUsers = async () => {
+    if (!token || user?.role !== "admin") {
+      setUsers([])
+      setUsersError("")
+      setIsUsersLoading(false)
+      return
+    }
+
+    setIsUsersLoading(true)
+    setUsersError("")
+
+    try {
+      const nextUsers = await requestUsers(token)
+      setUsers(nextUsers)
+    } catch (error) {
+      setUsers([])
+      setUsersError(error.message)
+    } finally {
+      setIsUsersLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    let isCancelled = false
+
+    const syncUsers = async () => {
+      if (!token || user?.role !== "admin") {
+        setUsers([])
+        setUsersError("")
+        setIsUsersLoading(false)
+        return
+      }
+
+      setIsUsersLoading(true)
+      setUsersError("")
+
+      try {
+        const nextUsers = await requestUsers(token)
+
+        if (!isCancelled) {
+          setUsers(nextUsers)
+        }
+      } catch (error) {
+        if (!isCancelled) {
+          setUsers([])
+          setUsersError(error.message)
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsUsersLoading(false)
+        }
+      }
+    }
+
+    syncUsers()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [token, user?.role])
+
+  const updateUserRole = async ({ userId, role }) => {
+    if (!token) {
+      throw new Error("You must be logged in to update user roles.")
+    }
+
+    const data = await apiRequest(`/api/users/${userId}/role`, {
+      method: "PATCH",
+      token,
+      body: { role },
+    })
+
+    setUsers((currentUsers) =>
+      currentUsers.map((currentUser) =>
+        currentUser.id === userId ? data.user : currentUser,
+      ),
+    )
+
+    return data.user
+  }
+
   const value = useMemo(
     () => ({
       courses,
       resources,
       users,
+      isUsersLoading,
+      usersError,
+      refreshUsers,
+      updateUserRole,
       createCourse,
       addModuleToCourse,
     }),
-    [courses, resources, users],
+    [courses, resources, users, isUsersLoading, usersError, token, user?.role],
   )
 
   return <AppDataContext.Provider value={value}>{children}</AppDataContext.Provider>

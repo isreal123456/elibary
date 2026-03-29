@@ -1,59 +1,121 @@
-import { createContext, useContext, useMemo, useState } from "react"
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { apiRequest } from "../lib/api"
 
 const AuthContext = createContext(null)
 
-const STORAGE_KEY = "elibary-user"
+const STORAGE_KEY = "elibary-auth"
 
-function getInitialUser() {
+function getStoredAuth() {
   const raw = localStorage.getItem(STORAGE_KEY)
+
   if (!raw) {
-    return null
+    return { token: null, user: null }
   }
 
   try {
-    return JSON.parse(raw)
+    const parsed = JSON.parse(raw)
+    return {
+      token: parsed.token || null,
+      user: parsed.user || null,
+    }
   } catch {
-    return null
+    return { token: null, user: null }
   }
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(getInitialUser)
+  const initialAuthRef = useRef(getStoredAuth())
+  const [authState, setAuthState] = useState(initialAuthRef.current)
+  const [isLoading, setIsLoading] = useState(() => Boolean(initialAuthRef.current.token))
 
-  const login = ({ email, role }) => {
-    const namePart = email.split("@")[0] || "User"
-    const roleDefaults = {
-      admin: "Admin User",
-      instructor: "Aisha Bello",
-      student: "Student User",
+  useEffect(() => {
+    if (authState.token) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(authState))
+      return
     }
 
-    const nextUser = {
-      name:
-        role === "instructor" && namePart.toLowerCase().includes("ibrahim")
-          ? "Ibrahim Yusuf"
-          : roleDefaults[role] ||
-            namePart.charAt(0).toUpperCase() + namePart.slice(1),
-      role,
-      email,
+    localStorage.removeItem(STORAGE_KEY)
+  }, [authState])
+
+  useEffect(() => {
+    if (!initialAuthRef.current.token) {
+      setIsLoading(false)
+      return
     }
-    setUser(nextUser)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser))
+
+    let isCancelled = false
+
+    const restoreSession = async () => {
+      try {
+        const data = await apiRequest("/api/auth/me", {
+          token: initialAuthRef.current.token,
+        })
+
+        if (!isCancelled) {
+          setAuthState((current) => ({ ...current, user: data.user }))
+        }
+      } catch {
+        if (!isCancelled) {
+          setAuthState({ token: null, user: null })
+        }
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    restoreSession()
+
+    return () => {
+      isCancelled = true
+    }
+  }, [])
+
+  const login = async ({ email, password }) => {
+    const data = await apiRequest("/api/auth/login", {
+      method: "POST",
+      body: { email, password },
+    })
+
+    setAuthState({
+      token: data.token,
+      user: data.user,
+    })
+
+    return data.user
+  }
+
+  const register = async ({ name, email, password, role }) => {
+    const data = await apiRequest("/api/auth/register", {
+      method: "POST",
+      body: { name, email, password, role },
+    })
+
+    setAuthState({
+      token: data.token,
+      user: data.user,
+    })
+
+    return data.user
   }
 
   const logout = () => {
-    setUser(null)
-    localStorage.removeItem(STORAGE_KEY)
+    setAuthState({ token: null, user: null })
+    setIsLoading(false)
   }
 
   const value = useMemo(
     () => ({
-      user,
+      user: authState.user,
+      token: authState.token,
       login,
+      register,
       logout,
-      isAuthenticated: Boolean(user),
+      isLoading,
+      isAuthenticated: Boolean(authState.token && authState.user),
     }),
-    [user],
+    [authState, isLoading],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

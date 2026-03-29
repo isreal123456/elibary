@@ -52,8 +52,12 @@ function HomePage() {
             <Button to={isAuthenticated ? "/dashboard" : "/login"} className="w-full sm:w-auto">
               {isAuthenticated ? "Open Dashboard" : "Login"}
             </Button>
-            <Button to={isAuthenticated ? "/courses" : "/login"} variant="secondary" className="w-full sm:w-auto">
-              Browse Courses
+            <Button
+              to={isAuthenticated ? "/courses" : "/register"}
+              variant="secondary"
+              className="w-full sm:w-auto"
+            >
+              {isAuthenticated ? "Browse Courses" : "Create Account"}
             </Button>
           </div>
         </div>

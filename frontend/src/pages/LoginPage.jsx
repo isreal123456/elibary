@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import Button from "../components/Button"
 import FormInput from "../components/FormInput"
 import { useAuth } from "../context/AuthContext"
@@ -10,13 +10,14 @@ function LoginPage() {
   const { login } = useAuth()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState("student")
   const [errors, setErrors] = useState({})
+  const [submitError, setSubmitError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const nextErrors = {}
+    setSubmitError("")
 
     if (!email.trim()) {
       nextErrors.email = "Email is required."
@@ -35,11 +36,14 @@ function LoginPage() {
     }
 
     setIsSubmitting(true)
-    setTimeout(() => {
-      login({ email, role })
-      setIsSubmitting(false)
+    try {
+      await login({ email, password })
       navigate(location.state?.from?.pathname || "/dashboard", { replace: true })
-    }, 900)
+    } catch (error) {
+      setSubmitError(error.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -71,26 +75,23 @@ function LoginPage() {
             error={errors.password}
           />
 
-          <div>
-            <label htmlFor="role" className="mb-1.5 block text-sm text-slate-700">
-              Role (Demo)
-            </label>
-            <select
-              id="role"
-              value={role}
-              onChange={(event) => setRole(event.target.value)}
-              className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
-            >
-              <option value="admin">Admin</option>
-              <option value="instructor">Instructor</option>
-              <option value="student">Student</option>
-            </select>
-          </div>
+          {submitError ? (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 ring-1 ring-red-200">
+              {submitError}
+            </p>
+          ) : null}
 
           <Button type="submit" fullWidth disabled={isSubmitting}>
             {isSubmitting ? "Logging in..." : "Login"}
           </Button>
         </form>
+        <p className="mt-4 text-sm text-slate-600">
+          Need an account?{" "}
+          <Link to="/register" className="font-medium text-blue-700 hover:text-blue-800">
+            Create one here
+          </Link>
+          .
+        </p>
       </div>
     </div>
   )
