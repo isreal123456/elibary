@@ -79,7 +79,7 @@ function RegisterPage() {
       <div className="mx-auto w-full max-w-md rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200 sm:p-8">
         <h1 className="text-2xl font-semibold text-slate-900">Create Account</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Register with your real details and choose the role you need for the platform.
+          Register with your real details and choose whether you are joining as a student or instructor. Admin access is managed separately.
         </p>
 
         <form className="mt-6 space-y-4" onSubmit={handleSubmit} noValidate>
@@ -134,7 +134,6 @@ function RegisterPage() {
             >
               <option value="student">Student</option>
               <option value="instructor">Instructor</option>
-              <option value="admin">Admin</option>
             </select>
           </div>
 

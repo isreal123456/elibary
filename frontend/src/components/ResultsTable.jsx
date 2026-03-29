@@ -10,6 +10,7 @@ function ResultsTable({ rows }) {
               <th className="py-2 pr-4 font-medium">Assessment</th>
               <th className="py-2 pr-4 font-medium">Score</th>
               <th className="py-2 pr-4 font-medium">Percentage</th>
+              <th className="py-2 pr-4 font-medium">File</th>
               <th className="py-2 font-medium">Status</th>
             </tr>
           </thead>
@@ -23,12 +24,28 @@ function ResultsTable({ rows }) {
                     {row.score}/{row.total}
                   </td>
                   <td className="py-2 pr-4 text-slate-600">{row.percentage}%</td>
+                  <td className="py-2 pr-4 text-slate-600">
+                    {row.uploadedFileUrl ? (
+                      <a
+                        href={row.uploadedFileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-blue-700 hover:underline"
+                      >
+                        {row.uploadedFileName || "View file"}
+                      </a>
+                    ) : row.uploadedFileName ? (
+                      row.uploadedFileName
+                    ) : (
+                      "No file"
+                    )}
+                  </td>
                   <td className="py-2 text-slate-600">{row.status}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="py-4 text-slate-500">
+                <td colSpan={6} className="py-4 text-slate-500">
                   No results available yet.
                 </td>
               </tr>

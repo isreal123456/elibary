@@ -34,15 +34,17 @@ function AssessmentCard({
       </div>
 
       <div className="mt-4 flex flex-col gap-2 sm:flex-row">
-        <Button
-          href={assessment.fileUrl}
-          target="_blank"
-          rel="noreferrer"
-          variant="secondary"
-          className="w-full sm:w-auto"
-        >
-          Download File
-        </Button>
+        {assessment.fileUrl ? (
+          <Button
+            href={assessment.fileUrl}
+            target="_blank"
+            rel="noreferrer"
+            variant="secondary"
+            className="w-full sm:w-auto"
+          >
+            Download File
+          </Button>
+        ) : null}
         {isStudent ? (
           <Button onClick={onStart} className="w-full sm:w-auto">
             {status === "Completed" ? "Resubmit" : "Submit Assessment"}

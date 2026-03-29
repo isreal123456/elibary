@@ -50,6 +50,7 @@ export async function getUserById(req, res) {
 export async function updateUserRole(req, res) {
   try {
     const nextRole = req.body.role?.trim().toLowerCase();
+    const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
 
     if (!nextRole || !USER_ROLES.includes(nextRole)) {
       res.status(400).json({ message: 'Please provide a valid role.' });
@@ -65,6 +66,11 @@ export async function updateUserRole(req, res) {
 
     if (!user) {
       res.status(404).json({ message: 'User not found.' });
+      return;
+    }
+
+    if (adminEmail && user.email === adminEmail) {
+      res.status(400).json({ message: 'The configured admin account role cannot be changed.' });
       return;
     }
 

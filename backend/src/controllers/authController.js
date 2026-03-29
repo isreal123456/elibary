@@ -27,8 +27,8 @@ export async function registerUser(req, res) {
       return;
     }
 
-    if (!USER_ROLES.includes(role)) {
-      res.status(400).json({ message: 'Please choose a valid role.' });
+    if (!USER_ROLES.includes(role) || role === 'admin') {
+      res.status(400).json({ message: 'Admin accounts are managed separately. Choose student or instructor.' });
       return;
     }
 
@@ -83,4 +83,35 @@ export async function loginUser(req, res) {
 
 export async function getCurrentUser(req, res) {
   res.status(200).json({ user: serializeUser(req.user) });
+}
+
+export async function changePassword(req, res) {
+  try {
+    const currentPassword = req.body.currentPassword?.trim();
+    const newPassword = req.body.newPassword?.trim();
+
+    if (!currentPassword || !newPassword) {
+      res.status(400).json({ message: 'Current password and new password are required.' });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      res.status(400).json({ message: 'New password must be at least 6 characters long.' });
+      return;
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+
+    if (!user || !(await user.matchPassword(currentPassword))) {
+      res.status(401).json({ message: 'Current password is incorrect.' });
+      return;
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password updated successfully.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Unable to update password right now.' });
+  }
 }

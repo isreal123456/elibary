@@ -100,6 +100,16 @@ export function AuthProvider({ children }) {
     return data.user
   }
 
+  const changePassword = async ({ currentPassword, newPassword }) => {
+    const data = await apiRequest("/api/auth/change-password", {
+      method: "PATCH",
+      token: authState.token,
+      body: { currentPassword, newPassword },
+    })
+
+    return data
+  }
+
   const logout = () => {
     setAuthState({ token: null, user: null })
     setIsLoading(false)
@@ -111,6 +121,7 @@ export function AuthProvider({ children }) {
       token: authState.token,
       login,
       register,
+      changePassword,
       logout,
       isLoading,
       isAuthenticated: Boolean(authState.token && authState.user),
